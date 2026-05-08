@@ -4,6 +4,71 @@
   box-sizing: border-box;
 }
 
+.fx-module {
+  cursor: grab;
+}
+.fx-module:active {
+  cursor: grabbing;
+}
+.fx-module-dragging {
+  opacity: 0.4;
+  transform: rotate(2deg);
+}
+.fx-module-add {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  font-weight: 200;
+  color: #888;
+  background: transparent !important;
+  border: 2px dashed #aaa;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, color 0.15s;
+}
+.fx-module-add:hover {
+  border-color: #00ff91;
+  color: #00ff91;
+}
+.fx-module button.fx-module-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 5;
+}
+.fx-module button.fx-module-remove:hover {
+  background: #c0392b;
+}
+.fx-module {
+  position: relative;
+}
+.pedal-picker-item {
+  background: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  text-transform: uppercase;
+  font-family: inherit;
+}
+.pedal-picker-item:hover {
+  background: #00ff91;
+  color: #000;
+}
+
 body {
   background-color: #f2f2f2;
   font-family: "Open Sans", sans-serif;
