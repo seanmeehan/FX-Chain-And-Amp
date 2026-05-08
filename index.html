@@ -5,10 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="./assets/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.40/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <title>FX Chain with Amp</title>
 </head>
 <body>
   <h1>FX Chain with Amp</h1>
+  <div id="recorder-bar" style="display:flex;gap:12px;align-items:center;justify-content:center;padding:8px;">
+    <button id="record-button" style="font-size:16px;padding:8px 20px;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">● Record</button>
+    <span id="record-status" style="font-family:monospace;color:#444;">Idle</span>
+    <div id="recordings-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+  <div id="start-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;">
+    <button id="start-button" style="font-size:32px;padding:24px 48px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">Start Audio</button>
+  </div>
   <div class="audio-container">
     <!-- input meter -->
     <div class="meter-container">
@@ -64,8 +73,27 @@
     <div class="fx-module" id="jcreverb-module"></div>
 
     <!-- <div class="fx-module" id="filter-module"></div> -->
+    <div class="fx-module fx-module-add" id="add-pedal" title="Add a pedal">+</div>
+  </div>
+  <div id="pedal-pool" style="display:none;"></div>
+  <div id="pedal-picker" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#222;color:#fff;padding:20px;border-radius:8px;z-index:9999;max-height:70vh;overflow-y:auto;min-width:280px;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <strong>Add a pedal</strong>
+      <button id="pedal-picker-close" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div id="pedal-picker-list" style="display:flex;flex-direction:column;gap:6px;"></div>
   </div>
   
 </body>
-<script type="module" src="./assets/app.js"></script>
+<script type="module">
+  console.log("BOOTSTRAP v3 LOADED");
+  document.getElementById("start-button").addEventListener("click", async () => {
+    console.log("Start clicked");
+    await Tone.start();
+    console.log("Tone started, context state:", Tone.context.state);
+    document.getElementById("start-overlay").remove();
+    await import("./assets/app.js");
+    console.log("app.js loaded");
+  }, { once: true });
+</script>
 </html>
