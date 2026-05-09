@@ -488,13 +488,161 @@ function updateTuner() {
 requestAnimationFrame(updateTuner);
 
 // === On-screen keyboard / synth =============================================
-// PolySynth routed into the FX chain so notes get the same effects as the mic.
+// Voices route into the FX chain so notes get the same effects as the mic.
+// PolySynth is the default fallback. Sampled instruments are loaded on demand
+// from tonejs-instruments by Nicholaus P. Brosowsky (CC BY 3.0):
+//   https://github.com/nbrosowsky/tonejs-instruments
 const synth = new Tone.PolySynth(Tone.Synth, {
   oscillator: { type: "sawtooth" },
   envelope: { attack: 0.005, decay: 0.1, sustain: 0.6, release: 0.4 },
   volume: -10,
 });
 synth.connect(audioSourceGain);
+
+const INSTRUMENT_BASE_URL = "https://nbrosowsky.github.io/tonejs-instruments/samples/";
+
+// Note → filename maps lifted verbatim from tonejs-instruments (Tonejs-Instruments.js).
+// Filenames use 's' for sharps (e.g. F#2 → Fs2.mp3).
+const INSTRUMENTS = {
+  synth: { label: "Synth (sawtooth)" },
+  "guitar-electric": {
+    label: "Electric Guitar",
+    urls: {
+      "C#2": "Cs2.mp3", "E2": "E2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3", "C3": "C3.mp3",
+      "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3", "C4": "C4.mp3",
+      "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3", "C5": "C5.mp3",
+      "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3", "C6": "C6.mp3",
+    },
+  },
+  "guitar-acoustic": {
+    label: "Acoustic Guitar",
+    urls: {
+      "D2": "D2.mp3", "D#2": "Ds2.mp3", "E2": "E2.mp3", "F2": "F2.mp3",
+      "F#2": "Fs2.mp3", "G2": "G2.mp3", "G#2": "Gs2.mp3", "A2": "A2.mp3",
+      "A#2": "As2.mp3", "B2": "B2.mp3", "C3": "C3.mp3", "C#3": "Cs3.mp3",
+      "D3": "D3.mp3", "D#3": "Ds3.mp3", "E3": "E3.mp3", "F3": "F3.mp3",
+      "F#3": "Fs3.mp3", "G3": "G3.mp3", "G#3": "Gs3.mp3", "A3": "A3.mp3",
+      "A#3": "As3.mp3", "B3": "B3.mp3", "C4": "C4.mp3", "C#4": "Cs4.mp3",
+      "D4": "D4.mp3", "E4": "E4.mp3", "F4": "F4.mp3", "F#4": "Fs4.mp3",
+      "G4": "G4.mp3", "G#4": "Gs4.mp3", "A4": "A4.mp3", "A#4": "As4.mp3",
+      "B4": "B4.mp3", "C5": "C5.mp3", "C#5": "Cs5.mp3", "D5": "D5.mp3",
+    },
+  },
+  "guitar-nylon": {
+    label: "Nylon Guitar",
+    urls: {
+      "B1": "B1.mp3", "D2": "D2.mp3", "E2": "E2.mp3", "F#2": "Fs2.mp3",
+      "G#2": "Gs2.mp3", "A2": "A2.mp3", "B2": "B2.mp3", "C#3": "Cs3.mp3",
+      "D3": "D3.mp3", "E3": "E3.mp3", "F#3": "Fs3.mp3", "G3": "G3.mp3",
+      "A3": "A3.mp3", "B3": "B3.mp3", "C#4": "Cs4.mp3", "D#4": "Ds4.mp3",
+      "E4": "E4.mp3", "F#4": "Fs4.mp3", "G#4": "Gs4.mp3", "A4": "A4.mp3",
+      "B4": "B4.mp3", "C#5": "Cs5.mp3", "D5": "D5.mp3", "E5": "E5.mp3",
+      "F#5": "Fs5.mp3", "G#5": "Gs5.mp3", "A5": "A5.mp3", "A#5": "As5.mp3",
+    },
+  },
+  "bass-electric": {
+    label: "Electric Bass",
+    urls: {
+      "C#1": "Cs1.mp3", "E1": "E1.mp3", "G1": "G1.mp3", "A#1": "As1.mp3",
+      "C#2": "Cs2.mp3", "E2": "E2.mp3", "G2": "G2.mp3", "A#2": "As2.mp3",
+      "C#3": "Cs3.mp3", "E3": "E3.mp3", "G3": "G3.mp3", "A#3": "As3.mp3",
+      "C#4": "Cs4.mp3", "E4": "E4.mp3", "G4": "G4.mp3", "A#4": "As4.mp3",
+    },
+  },
+  piano: {
+    label: "Piano",
+    urls: {
+      "A1": "A1.mp3", "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3",
+      "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3",
+      "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3",
+      "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3",
+      "A5": "A5.mp3", "C6": "C6.mp3", "D#6": "Ds6.mp3", "F#6": "Fs6.mp3",
+      "A6": "A6.mp3", "C7": "C7.mp3",
+    },
+  },
+  organ: {
+    label: "Organ",
+    urls: {
+      "C1": "C1.mp3", "D#1": "Ds1.mp3", "F#1": "Fs1.mp3", "A1": "A1.mp3",
+      "C2": "C2.mp3", "D#2": "Ds2.mp3", "F#2": "Fs2.mp3", "A2": "A2.mp3",
+      "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "A3": "A3.mp3",
+      "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3", "A4": "A4.mp3",
+      "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3", "A5": "A5.mp3",
+      "C6": "C6.mp3",
+    },
+  },
+  harp: {
+    label: "Harp",
+    urls: {
+      "E1": "E1.mp3", "G1": "G1.mp3", "B1": "B1.mp3", "D2": "D2.mp3",
+      "F2": "F2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "E3": "E3.mp3",
+      "G3": "G3.mp3", "B3": "B3.mp3", "D4": "D4.mp3", "F4": "F4.mp3",
+      "A4": "A4.mp3", "C5": "C5.mp3", "E5": "E5.mp3", "G5": "G5.mp3",
+      "B5": "B5.mp3", "D6": "D6.mp3", "F6": "F6.mp3", "A6": "A6.mp3",
+      "B6": "B6.mp3", "D7": "D7.mp3", "F7": "F7.mp3",
+    },
+  },
+};
+
+// Active voice. Starts as the PolySynth and gets swapped when the user picks
+// a sampled instrument. Both PolySynth and Sampler share the
+// triggerAttack/triggerRelease API, so attackNote/releaseNote stay generic.
+let currentInstrument = synth;
+let currentInstrumentKey = "synth";
+const instrumentSelect = document.getElementById("keyboard-instrument");
+const instrumentStatusEl = document.getElementById("keyboard-instrument-status");
+
+async function setInstrument(key) {
+  if (key === currentInstrumentKey) return;
+  const def = INSTRUMENTS[key];
+  if (!def) return;
+
+  // Release anything still held — the swap interrupts triggerRelease routing.
+  [...heldNotes].forEach((n) => releaseNote(n));
+  heldKeys.clear();
+
+  if (key === "synth") {
+    if (currentInstrument !== synth) {
+      try { currentInstrument.disconnect(); currentInstrument.dispose(); } catch {}
+    }
+    currentInstrument = synth;
+    currentInstrumentKey = "synth";
+    instrumentStatusEl.textContent = "";
+    return;
+  }
+
+  instrumentSelect.disabled = true;
+  instrumentStatusEl.textContent = "Loading…";
+  try {
+    const sampler = await new Promise((resolve, reject) => {
+      const s = new Tone.Sampler({
+        urls: def.urls,
+        baseUrl: INSTRUMENT_BASE_URL + key + "/",
+        release: 1,
+        onload: () => resolve(s),
+        onerror: (err) => reject(err),
+      });
+    });
+    if (currentInstrument !== synth) {
+      try { currentInstrument.disconnect(); currentInstrument.dispose(); } catch {}
+    }
+    sampler.connect(audioSourceGain);
+    currentInstrument = sampler;
+    currentInstrumentKey = key;
+    instrumentStatusEl.textContent = "Ready";
+    setTimeout(() => {
+      if (currentInstrumentKey === key) instrumentStatusEl.textContent = "";
+    }, 1500);
+  } catch (e) {
+    console.error("Failed to load instrument", key, e);
+    instrumentStatusEl.textContent = "Load failed";
+    instrumentSelect.value = currentInstrumentKey;
+  } finally {
+    instrumentSelect.disabled = false;
+  }
+}
+
+instrumentSelect.addEventListener("change", (e) => setInstrument(e.target.value));
 
 const keyboardEl = document.getElementById("keyboard");
 const keyboardToggle = document.getElementById("keyboard-toggle");
@@ -568,14 +716,14 @@ const heldNotes = new Set();
 function attackNote(note) {
   if (heldNotes.has(note)) return;
   heldNotes.add(note);
-  synth.triggerAttack(note);
+  currentInstrument.triggerAttack(note);
   document.querySelectorAll(`.kbd-key[data-note="${note}"]`).forEach((k) => k.classList.add("active"));
 }
 
 function releaseNote(note) {
   if (!heldNotes.has(note)) return;
   heldNotes.delete(note);
-  synth.triggerRelease(note);
+  currentInstrument.triggerRelease(note);
   document.querySelectorAll(`.kbd-key[data-note="${note}"]`).forEach((k) => k.classList.remove("active"));
 }
 

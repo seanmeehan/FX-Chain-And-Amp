@@ -23,8 +23,21 @@
     <div id="recordings-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
   <div id="keyboard-panel" style="margin:8px auto;max-width:760px;padding:10px;background:#1a1a1a;border-radius:8px;color:#fff;">
-    <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:8px;">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:8px;flex-wrap:wrap;">
       <button id="keyboard-toggle" class="tb-btn" style="background:#27ae60;">🎹 Keyboard</button>
+      <label style="font-size:12px;color:#bbb;display:flex;align-items:center;gap:6px;">Voice
+        <select id="keyboard-instrument" class="tb-btn" style="background:#34495e;text-transform:none;" title="Samples: tonejs-instruments by Nicholaus P. Brosowsky (CC BY 3.0)">
+          <option value="synth">Synth (sawtooth)</option>
+          <option value="guitar-electric">Electric Guitar</option>
+          <option value="guitar-acoustic">Acoustic Guitar</option>
+          <option value="guitar-nylon">Nylon Guitar</option>
+          <option value="bass-electric">Electric Bass</option>
+          <option value="piano">Piano</option>
+          <option value="organ">Organ</option>
+          <option value="harp">Harp</option>
+        </select>
+      </label>
+      <span id="keyboard-instrument-status" style="font-size:11px;color:#888;font-family:monospace;min-width:90px;"></span>
       <button id="keyboard-octave-down" class="tb-btn" style="background:#34495e;">◀ Oct</button>
       <span id="keyboard-octave-label" style="font-family:monospace;min-width:60px;text-align:center;">C4–C6</span>
       <button id="keyboard-octave-up" class="tb-btn" style="background:#34495e;">Oct ▶</button>
