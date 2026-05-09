@@ -488,14 +488,23 @@ function updateTuner() {
 requestAnimationFrame(updateTuner);
 
 // === On-screen keyboard / synth =============================================
-// PluckSynth (Karplus-Strong physical model) wrapped in a PolySynth for chords.
-// Produces a plucked-string tone that sounds like an electric guitar once it
-// hits the FX chain (especially distortion + amp IR).
-const synth = new Tone.PolySynth(Tone.PluckSynth, {
-  attackNoise: 1,
-  dampening: 4000,
-  resonance: 0.95,
-  volume: -6,
+// MonoSynth wrapped in PolySynth for chord support. Tuned for a plucked-string
+// feel — short attack, fast decay to a quiet sustain, and a filter envelope
+// that darkens the tone after the initial pick. Sounds guitar-like once run
+// through the FX chain (especially distortion + amp IR).
+const synth = new Tone.PolySynth(Tone.MonoSynth, {
+  oscillator: { type: "sawtooth" },
+  envelope: { attack: 0.003, decay: 0.4, sustain: 0.15, release: 0.6 },
+  filter: { Q: 2, type: "lowpass", rolloff: -24 },
+  filterEnvelope: {
+    attack: 0.002,
+    decay: 0.25,
+    sustain: 0.1,
+    release: 0.5,
+    baseFrequency: 200,
+    octaves: 4,
+  },
+  volume: -10,
 });
 synth.connect(audioSourceGain);
 
