@@ -11,9 +11,12 @@ Tone.context.bufferSize = 128;
 const monoSignal = new Tone.Mono();
 const destination = Tone.getDestination();
 const audioSourceGain = new Tone.Gain();
-// Always-on master brick-wall limiter as a safety net for extreme settings.
-// -3 dBFS is the conventional transparent threshold for a guitar master bus.
+// Master volume in dB (user controllable) feeds into a brick-wall limiter
+// before the destination. Starts at -12 dB so a fresh page load (or
+// accidental feedback loop on a phone) is never deafening.
+const masterVolume = new Tone.Volume(-12);
 const masterLimiter = new Tone.Limiter(-3);
+masterVolume.connect(masterLimiter);
 masterLimiter.connect(destination);
 
 // Meter Setup
@@ -648,6 +651,8 @@ async function setInputDevice(deviceId) {
     console.log("Mic stream opened:", currentStream.getAudioTracks().map((t) => t.label));
     currentSourceNode = Tone.context.createMediaStreamSource(currentStream);
     Tone.connect(currentSourceNode, audioSourceGain);
+    // Permission was just granted - refresh the dropdown so device labels populate
+    populateInputDevices();
   } catch (error) {
     console.error("Failed to open audio source:", error);
   }
@@ -672,6 +677,14 @@ document.getElementById("input-device").addEventListener("change", async (e) => 
   await setInputDevice(e.target.value || null);
 });
 
+const masterVolumeSlider = document.getElementById("master-volume");
+const masterVolumeDisplay = document.getElementById("master-volume-display");
+masterVolumeSlider.addEventListener("input", () => {
+  const v = parseFloat(masterVolumeSlider.value);
+  masterVolume.volume.value = v;
+  masterVolumeDisplay.textContent = `${v.toFixed(0)} dB`;
+});
+
 navigator.mediaDevices.addEventListener("devicechange", populateInputDevices);
 
 async function main() {
@@ -679,9 +692,13 @@ async function main() {
   audioSourceGain.connect(monoSignal);
   monoSignal.connect(inputMeter.input);
   inputMeter.output.connect(outputMeter.input);
-  outputMeter.output.connect(masterLimiter);
-  await setInputDevice(null);
+  outputMeter.output.connect(masterVolume);
+  // Default to keyboard/synth mode rather than opening the mic. This prevents
+  // feedback loops on phones where the mic and speaker are next to each other,
+  // which can happen instantly because echoCancellation is disabled.
+  await setInputDevice("__keyboard__");
   await populateInputDevices();
+  document.getElementById("input-device").value = "__keyboard__";
 }
 
 main();
