@@ -11,15 +11,9 @@ Tone.context.bufferSize = 128;
 const monoSignal = new Tone.Mono();
 const destination = Tone.getDestination();
 const audioSourceGain = new Tone.Gain();
-// Master brick-wall limiter so high-gain pedals can't blow out the speakers.
-// Anything peaking above -6 dBFS gets clamped without distortion artifacts.
-// Toggling sets the threshold to 0 dB which effectively bypasses the limiter
-// (signals can't exceed 0 dBFS, so it never engages).
-// -3 dBFS is the conventional sweet spot - transparent on most material,
-// catches peaks before they slam the destination.
-const LIMITER_ON_THRESHOLD = -3;
-const LIMITER_OFF_THRESHOLD = 0;
-const masterLimiter = new Tone.Limiter(LIMITER_ON_THRESHOLD);
+// Always-on master brick-wall limiter as a safety net for extreme settings.
+// -3 dBFS is the conventional transparent threshold for a guitar master bus.
+const masterLimiter = new Tone.Limiter(-3);
 masterLimiter.connect(destination);
 
 // Meter Setup
@@ -616,16 +610,6 @@ keyboardToggle.addEventListener("click", () => {
 
 window.addEventListener("resize", () => { if (keyboardVisible) buildKeyboard(); });
 
-// === Master limiter toggle ===================================================
-const limiterButton = document.getElementById("limiter-toggle");
-let limiterEnabled = true;
-function setLimiterEnabled(enabled) {
-  limiterEnabled = enabled;
-  masterLimiter.threshold.value = enabled ? LIMITER_ON_THRESHOLD : LIMITER_OFF_THRESHOLD;
-  limiterButton.style.background = enabled ? "#27ae60" : "#7f8c8d";
-  limiterButton.textContent = enabled ? "🛡 Limiter: ON" : "🛡 Limiter: OFF";
-}
-limiterButton.addEventListener("click", () => setLimiterEnabled(!limiterEnabled));
 
 // Main function
 let currentStream = null;
