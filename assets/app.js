@@ -144,6 +144,37 @@ rebuildChain();
 // === Presets =================================================================
 const PRESET_STORAGE_KEY = "fxchain_presets_v1";
 
+// Built-in presets - auto-loaded into the dropdown alongside saved ones.
+// Each pedal's `sliders` array matches the order of sliders in the pedal UI.
+const BUILTIN_PRESETS = {
+  "★ Rory Gallagher": {
+    pedals: [
+      // Light comp to even out picking dynamics
+      { id: "compressor-module", on: true, sliders: [5, -25] },
+      // Treble boost - Rangemaster bite into a cranked AC30
+      { id: "trebleboost-module", on: true, sliders: [12, 8, 3] },
+      // Short slap-back delay for solos
+      { id: "delay-module", on: true, sliders: [0.15, 0.2, 0.25] },
+      // Just a touch of room verb
+      { id: "jcreverb-module", on: true, sliders: [0.4, 0.2] },
+    ],
+    ampOn: true,
+    // Suggested amp IR: Allure_64_A30_G12 (Vox AC30)
+  },
+  "★ Blos (Pop-Punk)": {
+    pedals: [
+      // Tight comp for sustain on power chords without losing attack
+      { id: "compressor-module", on: true, sliders: [8, -30] },
+      // High-gain distortion with a small mid scoop - Billie Joe / Tom DeLonge crunch
+      { id: "distortion-module", on: true, sliders: [25, -3, 5] },
+      // Just enough room verb to keep it from sounding sterile
+      { id: "jcreverb-module", on: true, sliders: [0.5, 0.15] },
+    ],
+    ampOn: true,
+    // Suggested amp IR: Allure_67_Brit_Greenback (Marshall) or Allure_90s_Cali_V30 (Mesa)
+  },
+};
+
 function getPedalState(tile) {
   const sliders = [...tile.querySelectorAll(".slider-section .slider")].map((s) => parseFloat(s.value));
   const entry = fxById[tile.id];
@@ -200,8 +231,11 @@ function savePresetsMap(map) {
 function refreshPresetSelect() {
   const select = document.getElementById("load-preset");
   const presets = loadPresetsMap();
-  const names = Object.keys(presets).sort();
-  select.innerHTML = '<option value="">Load preset…</option>' + names.map((n) => `<option value="${encodeURIComponent(n)}">${n}</option>`).join("");
+  const builtinNames = Object.keys(BUILTIN_PRESETS);
+  const userNames = Object.keys(presets).sort();
+  const builtinOpts = builtinNames.map((n) => `<option value="builtin:${encodeURIComponent(n)}">${n}</option>`).join("");
+  const userOpts = userNames.map((n) => `<option value="${encodeURIComponent(n)}">${n}</option>`).join("");
+  select.innerHTML = '<option value="">Load preset…</option>' + builtinOpts + userOpts;
 }
 
 document.getElementById("save-preset").addEventListener("click", () => {
@@ -215,16 +249,23 @@ document.getElementById("save-preset").addEventListener("click", () => {
 });
 
 document.getElementById("load-preset").addEventListener("change", (e) => {
-  const name = e.target.value ? decodeURIComponent(e.target.value) : "";
-  if (!name) return;
+  const val = e.target.value;
+  if (!val) return;
+  if (val.startsWith("builtin:")) {
+    const name = decodeURIComponent(val.slice("builtin:".length));
+    if (BUILTIN_PRESETS[name]) applyPreset(BUILTIN_PRESETS[name]);
+    return;
+  }
+  const name = decodeURIComponent(val);
   const presets = loadPresetsMap();
   if (presets[name]) applyPreset(presets[name]);
 });
 
 document.getElementById("delete-preset").addEventListener("click", () => {
   const select = document.getElementById("load-preset");
-  const name = select.value ? decodeURIComponent(select.value) : "";
-  if (!name) return alert("Pick a preset to delete first.");
+  const val = select.value;
+  if (!val || val.startsWith("builtin:")) return alert("Pick a saved preset to delete (built-ins can't be deleted).");
+  const name = decodeURIComponent(val);
   if (!confirm(`Delete preset "${name}"?`)) return;
   const presets = loadPresetsMap();
   delete presets[name];
@@ -305,8 +346,11 @@ const tunerAnalyserSize = 2048;
 const tunerAnalyser = Tone.context.createAnalyser();
 tunerAnalyser.fftSize = tunerAnalyserSize;
 const tunerBuf = new Float32Array(tunerAnalyserSize);
-// Tap pre-FX signal so the tuner reads dry input
-Tone.connect(audioSourceGain, tunerAnalyser);
+// Boost the signal feeding the tuner so quiet mic sources still register.
+// Doesn't affect what you hear — this branch is analysis-only.
+const tunerBoost = new Tone.Gain(8);
+audioSourceGain.connect(tunerBoost);
+Tone.connect(tunerBoost, tunerAnalyser);
 
 const tunerNoteEl = document.getElementById("tuner-note");
 const tunerCentsEl = document.getElementById("tuner-cents");
@@ -317,13 +361,15 @@ function autoCorrelate(buf, sampleRate) {
   let rms = 0;
   for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
   rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.01) return -1; // too quiet
+  if (rms < 0.003) return -1; // too quiet
 
+  // Trim silence at the edges. Threshold scales with the actual signal level
+  // so a quiet-but-clean signal isn't trimmed away entirely.
+  const trimThres = Math.max(0.05, rms * 0.5);
   let r1 = 0;
   let r2 = SIZE - 1;
-  const thres = 0.2;
-  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
-  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+  for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < trimThres) { r1 = i; break; }
+  for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < trimThres) { r2 = SIZE - i; break; }
   buf = buf.slice(r1, r2);
   SIZE = buf.length;
 
