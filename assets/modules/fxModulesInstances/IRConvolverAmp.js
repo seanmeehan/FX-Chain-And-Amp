@@ -54,9 +54,9 @@ const IRConvolverAmpHighGain = new SliderParameters(
 const IRConvolverAmpOutputGain = new SliderParameters(
   "postgain",
   0,
-  20,
-  0.01,
   5,
+  0.01,
+  1.5,
   "post-gain",
   IRConvolverAmpModuleContainer
 );
@@ -66,7 +66,7 @@ const IRConvolverAmpVolume = new SliderParameters(
   -30,
   30,
   0.01,
-  3,
+  -6,
   "volume",
   IRConvolverAmpModuleContainer
 );
