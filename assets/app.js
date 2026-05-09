@@ -749,31 +749,12 @@ recordButton.addEventListener("click", async () => {
 const aiGenerateBtn = document.getElementById("ai-generate-btn");
 const aiGuitaristInput = document.getElementById("ai-guitarist-input");
 const aiStatus = document.getElementById("ai-status");
-const aiSettingsBtn = document.getElementById("ai-settings-btn");
 const aiSettingsDialog = document.getElementById("ai-settings-dialog");
-const aiSettingsForm = document.getElementById("ai-settings-form");
-const apiKeyInput = document.getElementById("api-key-input");
-const aiModelSelect = document.getElementById("ai-model-select");
-const aiSettingsCancel = document.getElementById("ai-settings-cancel");
 
 function setAiStatus(msg, isError = false) {
   aiStatus.textContent = msg;
   aiStatus.style.color = isError ? "#e74c3c" : "#888";
 }
-
-aiSettingsBtn.addEventListener("click", () => {
-  apiKeyInput.value = getApiKey();
-  aiModelSelect.value = getModel();
-  aiSettingsDialog.showModal();
-});
-
-aiSettingsCancel.addEventListener("click", () => aiSettingsDialog.close());
-
-aiSettingsForm.addEventListener("submit", () => {
-  setApiKey(apiKeyInput.value);
-  setModel(aiModelSelect.value);
-  setAiStatus("Settings saved.");
-});
 
 aiGuitaristInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") aiGenerateBtn.click();
@@ -792,8 +773,6 @@ aiGenerateBtn.addEventListener("click", async () => {
     setAiStatus(`✓ ${name} tone loaded`);
   } catch (err) {
     if (err.message === "NO_API_KEY") {
-      apiKeyInput.value = getApiKey();
-      aiModelSelect.value = getModel();
       aiSettingsDialog.showModal();
       setAiStatus("Enter your API key first", true);
     } else {

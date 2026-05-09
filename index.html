@@ -145,6 +145,23 @@
   </div>
   
 </body>
+<script>
+  // Settings dialog works from page load, independently of app.js
+  const _dialog = document.getElementById("ai-settings-dialog");
+  const _apiKeyInput = document.getElementById("api-key-input");
+  const _modelSelect = document.getElementById("ai-model-select");
+  document.getElementById("ai-settings-btn").addEventListener("click", () => {
+    _apiKeyInput.value = localStorage.getItem("anthropic_api_key") || "";
+    _modelSelect.value = localStorage.getItem("anthropic_model") || "claude-haiku-4-5-20251001";
+    _dialog.showModal();
+  });
+  document.getElementById("ai-settings-cancel").addEventListener("click", () => _dialog.close());
+  document.getElementById("ai-settings-form").addEventListener("submit", () => {
+    localStorage.setItem("anthropic_api_key", _apiKeyInput.value.trim());
+    localStorage.setItem("anthropic_model", _modelSelect.value);
+    _dialog.close();
+  });
+</script>
 <script type="module">
   console.log("BOOTSTRAP v3 LOADED");
   document.getElementById("start-button").addEventListener("click", async () => {
