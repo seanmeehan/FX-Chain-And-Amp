@@ -51,6 +51,30 @@
     <button id="tap-tempo" class="tb-btn" style="background:#8e44ad;">⏱ Tap tempo</button>
     <span id="tap-tempo-display" style="font-family:monospace;color:#444;"></span>
   </div>
+  <div id="ai-tone-bar" style="display:flex;gap:8px;align-items:center;justify-content:center;padding:8px;flex-wrap:wrap;">
+    <input type="text" id="ai-guitarist-input" class="tb-btn" placeholder="Guitarist name…" style="background:#1a1a1a;color:#fff;width:200px;cursor:text;text-transform:none;" />
+    <button id="ai-generate-btn" class="tb-btn ai-generate-btn">✦ Generate Tone</button>
+    <button id="ai-settings-btn" class="tb-btn" style="background:#34495e;padding:8px 10px;" title="AI settings">⚙</button>
+    <span id="ai-status" style="font-family:monospace;font-size:12px;color:#444;"></span>
+  </div>
+
+  <dialog id="ai-settings-dialog" style="border-radius:8px;border:none;padding:24px;min-width:340px;background:#1a1a1a;color:#fff;">
+    <form method="dialog" id="ai-settings-form">
+      <h2 style="font-size:16px;margin-bottom:16px;color:#00ff91;background:none;border:none;padding:0;text-align:left;">AI Tone Generator Settings</h2>
+      <label style="display:block;font-size:12px;margin-bottom:4px;text-align:left;">Anthropic API Key</label>
+      <input type="password" id="api-key-input" placeholder="sk-ant-…" style="width:100%;padding:8px;border-radius:4px;border:1px solid #555;background:#333;color:#fff;font-family:monospace;font-size:13px;margin-bottom:16px;" />
+      <label style="display:block;font-size:12px;margin-bottom:4px;text-align:left;">Model</label>
+      <select id="ai-model-select" style="width:100%;padding:8px;border-radius:4px;border:1px solid #555;background:#333;color:#fff;font-size:13px;margin-bottom:20px;">
+        <option value="claude-haiku-4-5-20251001">Haiku (fast)</option>
+        <option value="claude-sonnet-4-6">Sonnet (deeper knowledge)</option>
+      </select>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button type="button" id="ai-settings-cancel" class="tb-btn" style="background:#555;">Cancel</button>
+        <button type="submit" class="tb-btn" style="background:#16a085;">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="start-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;">
     <button id="start-button" style="font-size:32px;padding:24px 48px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">Start Audio</button>
   </div>

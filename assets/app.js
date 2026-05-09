@@ -1,6 +1,7 @@
 // Import Modules
 import Meter from "./modules/audioModulesAndComponents/meterModule.js";
 import { fxModules, fxButtons } from "./modules.js";
+import { generateToneForGuitarist, getApiKey, setApiKey, getModel, setModel } from "./aiToneGenerator.js";
 
 // Audio Context Setup
 Tone.context.lookAhead = 0;
@@ -741,5 +742,64 @@ recordButton.addEventListener("click", async () => {
     link.textContent = `⬇ ${stamp.slice(11, 19)}`;
     link.style.cssText = "padding:4px 8px;background:#2ecc71;color:white;border-radius:4px;text-decoration:none;font-family:monospace;";
     recordingsList.appendChild(link);
+  }
+});
+
+// === AI Tone Generator =======================================================
+const aiGenerateBtn = document.getElementById("ai-generate-btn");
+const aiGuitaristInput = document.getElementById("ai-guitarist-input");
+const aiStatus = document.getElementById("ai-status");
+const aiSettingsBtn = document.getElementById("ai-settings-btn");
+const aiSettingsDialog = document.getElementById("ai-settings-dialog");
+const aiSettingsForm = document.getElementById("ai-settings-form");
+const apiKeyInput = document.getElementById("api-key-input");
+const aiModelSelect = document.getElementById("ai-model-select");
+const aiSettingsCancel = document.getElementById("ai-settings-cancel");
+
+function setAiStatus(msg, isError = false) {
+  aiStatus.textContent = msg;
+  aiStatus.style.color = isError ? "#e74c3c" : "#888";
+}
+
+aiSettingsBtn.addEventListener("click", () => {
+  apiKeyInput.value = getApiKey();
+  aiModelSelect.value = getModel();
+  aiSettingsDialog.showModal();
+});
+
+aiSettingsCancel.addEventListener("click", () => aiSettingsDialog.close());
+
+aiSettingsForm.addEventListener("submit", () => {
+  setApiKey(apiKeyInput.value);
+  setModel(aiModelSelect.value);
+  setAiStatus("Settings saved.");
+});
+
+aiGuitaristInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") aiGenerateBtn.click();
+});
+
+aiGenerateBtn.addEventListener("click", async () => {
+  const name = aiGuitaristInput.value.trim();
+  if (!name) return;
+
+  aiGenerateBtn.disabled = true;
+  setAiStatus("Generating…");
+
+  try {
+    const preset = await generateToneForGuitarist(name);
+    applyPreset(preset);
+    setAiStatus(`✓ ${name} tone loaded`);
+  } catch (err) {
+    if (err.message === "NO_API_KEY") {
+      apiKeyInput.value = getApiKey();
+      aiModelSelect.value = getModel();
+      aiSettingsDialog.showModal();
+      setAiStatus("Enter your API key first", true);
+    } else {
+      setAiStatus(`Error: ${err.message}`, true);
+    }
+  } finally {
+    aiGenerateBtn.disabled = false;
   }
 });
