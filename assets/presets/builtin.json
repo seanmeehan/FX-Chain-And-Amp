@@ -1,0 +1,23 @@
+[
+  {
+    "name": "★ Rory Gallagher",
+    "pedals": [
+      { "id": "compressor-module", "on": true, "sliders": [5, -25] },
+      { "id": "trebleboost-module", "on": true, "sliders": [10, 6, 1] },
+      { "id": "delay-module", "on": true, "sliders": [0.15, 0.2, 0.25] },
+      { "id": "jcreverb-module", "on": true, "sliders": [0.4, 0.2] }
+    ],
+    "ampOn": true,
+    "ampType": "Allure_64_A30_G12"
+  },
+  {
+    "name": "★ Blos (Pop-Punk)",
+    "pedals": [
+      { "id": "compressor-module", "on": true, "sliders": [8, -30] },
+      { "id": "distortion-module", "on": true, "sliders": [20, -3, 1] },
+      { "id": "jcreverb-module", "on": true, "sliders": [0.5, 0.15] }
+    ],
+    "ampOn": true,
+    "ampType": "Allure_67_Brit_Greenback"
+  }
+]

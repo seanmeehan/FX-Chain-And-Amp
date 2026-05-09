@@ -152,36 +152,27 @@ rebuildChain();
 // === Presets =================================================================
 const PRESET_STORAGE_KEY = "fxchain_presets_v1";
 
-// Built-in presets - auto-loaded into the dropdown alongside saved ones.
-// Each pedal's `sliders` array matches the order of sliders in the pedal UI.
-const BUILTIN_PRESETS = {
-  "★ Rory Gallagher": {
-    pedals: [
-      // Light comp to even out picking dynamics
-      { id: "compressor-module", on: true, sliders: [5, -25] },
-      // Treble boost - Rangemaster bite into a cranked AC30
-      { id: "trebleboost-module", on: true, sliders: [10, 6, 1] },
-      // Short slap-back delay for solos
-      { id: "delay-module", on: true, sliders: [0.15, 0.2, 0.25] },
-      // Just a touch of room verb
-      { id: "jcreverb-module", on: true, sliders: [0.4, 0.2] },
-    ],
-    ampOn: true,
-    ampType: "Allure_64_A30_G12", // Vox AC30
-  },
-  "★ Blos (Pop-Punk)": {
-    pedals: [
-      // Tight comp for sustain on power chords without losing attack
-      { id: "compressor-module", on: true, sliders: [8, -30] },
-      // High-gain distortion with a small mid scoop - Billie Joe / Tom DeLonge crunch
-      { id: "distortion-module", on: true, sliders: [20, -3, 1] },
-      // Just enough room verb to keep it from sounding sterile
-      { id: "jcreverb-module", on: true, sliders: [0.5, 0.15] },
-    ],
-    ampOn: true,
-    ampType: "Allure_67_Brit_Greenback", // Marshall Greenback
-  },
-};
+// Built-in presets - loaded from assets/presets/builtin.json on startup so new
+// presets can be added by editing data only (no code changes). The fetch URL
+// is the only thing to swap when this moves behind a real API later.
+const BUILTIN_PRESETS_URL = "./assets/presets/builtin.json";
+let BUILTIN_PRESETS = {};
+
+async function loadBuiltinPresets() {
+  try {
+    const res = await fetch(BUILTIN_PRESETS_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = await res.json();
+    BUILTIN_PRESETS = {};
+    list.forEach((p) => {
+      const { name, ...preset } = p;
+      if (name) BUILTIN_PRESETS[name] = preset;
+    });
+  } catch (e) {
+    console.warn("Could not load built-in presets:", e);
+  }
+  refreshPresetSelect();
+}
 
 function getPedalState(tile) {
   const sliders = [...tile.querySelectorAll(".slider-section .slider")].map((s) => parseFloat(s.value));
@@ -314,32 +305,33 @@ document.getElementById("share-preset").addEventListener("click", async () => {
   }
 });
 
-// Export the current preset as a JS snippet ready to paste into BUILTIN_PRESETS
-// in this file — so AI-generated or manually-tuned tones can be promoted to
-// shipped built-ins for everyone (like ★ Rory Gallagher / ★ Blos).
-function formatBuiltinSnippet(name, preset) {
+// Export the current preset as a JSON entry ready to paste into
+// assets/presets/builtin.json — so AI-generated or manually-tuned tones can be
+// promoted to shipped built-ins for everyone (like ★ Rory Gallagher / ★ Blos).
+function formatBuiltinJson(name, preset) {
   const pedalsStr = preset.pedals
-    .map((p) => `    { id: ${JSON.stringify(p.id)}, on: ${!!p.on}, sliders: [${p.sliders.join(", ")}] },`)
-    .join("\n");
-  return `  ${JSON.stringify(name)}: {
-    pedals: [
+    .map((p) => `      { "id": ${JSON.stringify(p.id)}, "on": ${!!p.on}, "sliders": [${p.sliders.join(", ")}] }`)
+    .join(",\n");
+  return `  {
+    "name": ${JSON.stringify(name)},
+    "pedals": [
 ${pedalsStr}
     ],
-    ampOn: ${!!preset.ampOn},
-    ampType: ${JSON.stringify(preset.ampType || "")},
-  },`;
+    "ampOn": ${!!preset.ampOn},
+    "ampType": ${JSON.stringify(preset.ampType || "")}
+  }`;
 }
 
 document.getElementById("export-builtin").addEventListener("click", async () => {
   const rawName = prompt("Name this preset (a ★ prefix is added automatically if missing):");
   if (!rawName) return;
   const name = rawName.trim().startsWith("★") ? rawName.trim() : `★ ${rawName.trim()}`;
-  const snippet = formatBuiltinSnippet(name, getCurrentPreset());
+  const snippet = formatBuiltinJson(name, getCurrentPreset());
   try {
     await navigator.clipboard.writeText(snippet);
-    alert(`Copied! Paste this snippet inside BUILTIN_PRESETS in assets/app.js:\n\n${snippet}`);
+    alert(`Copied! Add this entry to the array in assets/presets/builtin.json (don't forget a comma after the previous entry):\n\n${snippet}`);
   } catch {
-    prompt("Copy this snippet into BUILTIN_PRESETS in assets/app.js:", snippet);
+    prompt("Add this entry to the array in assets/presets/builtin.json:", snippet);
   }
 });
 
@@ -356,6 +348,7 @@ function applyHashPreset() {
 }
 
 refreshPresetSelect();
+loadBuiltinPresets();
 applyHashPreset();
 
 // === Tap Tempo ===============================================================
