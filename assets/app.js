@@ -167,7 +167,7 @@ const BUILTIN_PRESETS = {
       { id: "jcreverb-module", on: true, sliders: [0.4, 0.2] },
     ],
     ampOn: true,
-    // Suggested amp IR: Allure_64_A30_G12 (Vox AC30)
+    ampType: "Allure_64_A30_G12", // Vox AC30
   },
   "★ Blos (Pop-Punk)": {
     pedals: [
@@ -179,7 +179,7 @@ const BUILTIN_PRESETS = {
       { id: "jcreverb-module", on: true, sliders: [0.5, 0.15] },
     ],
     ampOn: true,
-    // Suggested amp IR: Allure_67_Brit_Greenback (Marshall) or Allure_90s_Cali_V30 (Mesa)
+    ampType: "Allure_67_Brit_Greenback", // Marshall Greenback
   },
 };
 
@@ -194,7 +194,27 @@ function getCurrentPreset() {
   document.querySelectorAll(".module-container .fx-module:not(.fx-module-add)").forEach((tile) => {
     pedals.push(getPedalState(tile));
   });
-  return { pedals, ampOn: ampButton.on };
+  // Capture amp IR by display name (e.g. "Allure_64_A30_G12") so presets stay
+  // portable even if the underlying download URL changes.
+  const ampSelect = document.getElementById("amp-type");
+  const selected = ampSelect.options[ampSelect.selectedIndex];
+  const ampType = selected && selected.value ? selected.textContent : "";
+  return { pedals, ampOn: ampButton.on, ampType };
+}
+
+function applyAmpType(ampTypeName, attemptsLeft = 20) {
+  if (!ampTypeName) return;
+  const ampSelect = document.getElementById("amp-type");
+  const match = [...ampSelect.options].find((o) => o.textContent === ampTypeName && o.value);
+  if (match) {
+    ampSelect.value = match.value;
+    ampSelect.dispatchEvent(new Event("change"));
+  } else if (attemptsLeft > 0) {
+    // IR list loads async from GitHub API; retry briefly if not yet populated
+    setTimeout(() => applyAmpType(ampTypeName, attemptsLeft - 1), 200);
+  } else {
+    console.warn(`Amp IR "${ampTypeName}" not found in dropdown`);
+  }
 }
 
 function applyPreset(preset) {
@@ -221,6 +241,7 @@ function applyPreset(preset) {
     if (entry && entry.button.on !== !!p.on) entry.button.button.click();
   });
   if (ampButton.on !== !!preset.ampOn) ampButton.button.click();
+  if (preset.ampType) applyAmpType(preset.ampType);
   rebuildChain();
 }
 
