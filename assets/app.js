@@ -160,7 +160,7 @@ const BUILTIN_PRESETS = {
       // Light comp to even out picking dynamics
       { id: "compressor-module", on: true, sliders: [5, -25] },
       // Treble boost - Rangemaster bite into a cranked AC30
-      { id: "trebleboost-module", on: true, sliders: [12, 8, 3] },
+      { id: "trebleboost-module", on: true, sliders: [10, 6, 1] },
       // Short slap-back delay for solos
       { id: "delay-module", on: true, sliders: [0.15, 0.2, 0.25] },
       // Just a touch of room verb
@@ -174,7 +174,7 @@ const BUILTIN_PRESETS = {
       // Tight comp for sustain on power chords without losing attack
       { id: "compressor-module", on: true, sliders: [8, -30] },
       // High-gain distortion with a small mid scoop - Billie Joe / Tom DeLonge crunch
-      { id: "distortion-module", on: true, sliders: [25, -3, 5] },
+      { id: "distortion-module", on: true, sliders: [20, -3, 1] },
       // Just enough room verb to keep it from sounding sterile
       { id: "jcreverb-module", on: true, sliders: [0.5, 0.15] },
     ],
