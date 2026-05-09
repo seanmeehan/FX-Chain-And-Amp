@@ -488,25 +488,34 @@ function updateTuner() {
 requestAnimationFrame(updateTuner);
 
 // === On-screen keyboard / synth =============================================
-// MonoSynth wrapped in PolySynth for chord support. Tuned for a plucked-string
-// feel — short attack, fast decay to a quiet sustain, and a filter envelope
-// that darkens the tone after the initial pick. Sounds guitar-like once run
-// through the FX chain (especially distortion + amp IR).
-const synth = new Tone.PolySynth(Tone.MonoSynth, {
-  oscillator: { type: "sawtooth" },
-  envelope: { attack: 0.003, decay: 0.4, sustain: 0.15, release: 0.6 },
-  filter: { Q: 2, type: "lowpass", rolloff: -24 },
-  filterEnvelope: {
-    attack: 0.002,
-    decay: 0.25,
-    sustain: 0.1,
-    release: 0.5,
-    baseFrequency: 200,
-    octaves: 4,
+// PluckSynth is the Karplus-Strong physical model — it actually simulates a
+// plucked string (delay line + filter feedback) and sounds genuinely guitar-
+// like, especially through distortion + amp IR. PluckSynth can't go inside
+// PolySynth (doesn't extend Monophonic), so we manage a voice pool manually
+// and round-robin through it on each attack.
+const PLUCK_VOICES = 8;
+const pluckBus = new Tone.Gain();
+pluckBus.connect(audioSourceGain);
+const pluckPool = [];
+for (let i = 0; i < PLUCK_VOICES; i++) {
+  const v = new Tone.PluckSynth({
+    attackNoise: 0.7,   // a bit of pick noise on attack
+    dampening: 5000,    // brighter strings
+    resonance: 0.97,    // long sustain so chords ring out
+  });
+  v.volume.value = -8;
+  v.connect(pluckBus);
+  pluckPool.push(v);
+}
+let pluckNext = 0;
+const synth = {
+  triggerAttack(note) {
+    pluckPool[pluckNext].triggerAttack(note);
+    pluckNext = (pluckNext + 1) % PLUCK_VOICES;
   },
-  volume: -10,
-});
-synth.connect(audioSourceGain);
+  // PluckSynth strings decay naturally — no explicit release needed.
+  triggerRelease() {},
+};
 
 const keyboardEl = document.getElementById("keyboard");
 const keyboardToggle = document.getElementById("keyboard-toggle");
