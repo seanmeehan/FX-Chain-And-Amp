@@ -31,7 +31,7 @@ const distortionGain = new SliderParameters(
   0.01,
   10,
   0.01,
-  1,
+  0.3,
   "level",
   distortionModule
 );

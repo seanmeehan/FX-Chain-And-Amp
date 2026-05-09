@@ -11,6 +11,14 @@ Tone.context.bufferSize = 128;
 const monoSignal = new Tone.Mono();
 const destination = Tone.getDestination();
 const audioSourceGain = new Tone.Gain();
+// Master brick-wall limiter so high-gain pedals can't blow out the speakers.
+// Anything peaking above -6 dBFS gets clamped without distortion artifacts.
+// Toggling sets the threshold to 0 dB which effectively bypasses the limiter
+// (signals can't exceed 0 dBFS, so it never engages).
+const LIMITER_ON_THRESHOLD = -6;
+const LIMITER_OFF_THRESHOLD = 0;
+const masterLimiter = new Tone.Limiter(LIMITER_ON_THRESHOLD);
+masterLimiter.connect(destination);
 
 // Meter Setup
 const inputMeter = new Meter(-100, 0, "input-meter", "input-db-value");
@@ -585,6 +593,17 @@ keyboardToggle.addEventListener("click", () => {
 
 window.addEventListener("resize", () => { if (keyboardVisible) buildKeyboard(); });
 
+// === Master limiter toggle ===================================================
+const limiterButton = document.getElementById("limiter-toggle");
+let limiterEnabled = true;
+function setLimiterEnabled(enabled) {
+  limiterEnabled = enabled;
+  masterLimiter.threshold.value = enabled ? LIMITER_ON_THRESHOLD : LIMITER_OFF_THRESHOLD;
+  limiterButton.style.background = enabled ? "#27ae60" : "#7f8c8d";
+  limiterButton.textContent = enabled ? "🛡 Limiter: ON" : "🛡 Limiter: OFF";
+}
+limiterButton.addEventListener("click", () => setLimiterEnabled(!limiterEnabled));
+
 // Main function
 let currentStream = null;
 let currentSourceNode = null;
@@ -653,7 +672,7 @@ async function main() {
   audioSourceGain.connect(monoSignal);
   monoSignal.connect(inputMeter.input);
   inputMeter.output.connect(outputMeter.input);
-  outputMeter.output.connect(destination);
+  outputMeter.output.connect(masterLimiter);
   await setInputDevice(null);
   await populateInputDevices();
 }
