@@ -43,7 +43,7 @@ const chebyshevDistortionFX = new ChebyshevDistortionFXModule(
   "chebydistortion-module",
   "cheby",
   "slategray",
-  1,
+  0.5,
   chebyshevDistortionValue.value,
   0.1,
   chebyshevDistortionToneBoost.value,

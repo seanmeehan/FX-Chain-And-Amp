@@ -34,7 +34,7 @@ const fuzzFX = new CompleteDistortionFXModule(
   "fuzz-module",
   "fuzz",
   "darkgreen",
-  3,
+  1,
   distortionValue.value,
   bitsValue.value,
   0.1,
@@ -42,7 +42,7 @@ const fuzzFX = new CompleteDistortionFXModule(
   0.3,
   1000,
   3000,
-  1,
+  0.3,
   1
 );
 

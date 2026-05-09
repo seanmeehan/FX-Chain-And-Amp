@@ -41,7 +41,7 @@ const distortionFX = new DistortionFXModule(
   "distortion-module",
   "distortion",
   "orange",
-  1,
+  0.5,
   distortionValue.value,
   0.1,
   distortionToneBoost.value,

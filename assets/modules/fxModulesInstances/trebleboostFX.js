@@ -40,7 +40,7 @@ const trebleboostFX = new DistortionFXModule(
   "trebleboost-module",
   "treble boost",
   "green",
-  1,
+  0.5,
   trebleboostValue.value,
   0,
   0.5,

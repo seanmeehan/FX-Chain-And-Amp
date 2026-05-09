@@ -33,7 +33,7 @@ const distortionFX2 = new DistortionFXModule(
   "distortion-module-2",
   "distortion +",
   "yellow",
-  1,
+  0.5,
   distortionValue2.value,
   0.1,
   4,
