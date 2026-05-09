@@ -15,7 +15,9 @@ const audioSourceGain = new Tone.Gain();
 // Anything peaking above -6 dBFS gets clamped without distortion artifacts.
 // Toggling sets the threshold to 0 dB which effectively bypasses the limiter
 // (signals can't exceed 0 dBFS, so it never engages).
-const LIMITER_ON_THRESHOLD = -6;
+// -3 dBFS is the conventional sweet spot - transparent on most material,
+// catches peaks before they slam the destination.
+const LIMITER_ON_THRESHOLD = -3;
 const LIMITER_OFF_THRESHOLD = 0;
 const masterLimiter = new Tone.Limiter(LIMITER_ON_THRESHOLD);
 masterLimiter.connect(destination);
