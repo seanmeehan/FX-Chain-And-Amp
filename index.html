@@ -15,6 +15,10 @@
       <select id="input-device" class="tb-btn" style="background:#34495e;margin-left:6px;"><option value="">(default)</option></select>
     </label>
     <button id="record-button" class="tb-btn" style="background:#c0392b;">● Record</button>
+    <label style="font-size:13px;color:#444;display:flex;align-items:center;gap:6px;">Volume
+      <input id="master-volume" type="range" min="-60" max="0" step="0.1" value="-12" style="width:120px;">
+      <span id="master-volume-display" style="font-family:monospace;width:48px;text-align:right;">-12 dB</span>
+    </label>
     <span id="record-status" style="font-family:monospace;color:#444;">Idle</span>
     <div id="recordings-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
