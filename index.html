@@ -75,9 +75,6 @@
     </form>
   </dialog>
 
-  <div id="start-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;">
-    <button id="start-button" style="font-size:32px;padding:24px 48px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">Start Audio</button>
-  </div>
   <div class="audio-container">
     <!-- input meter -->
     <div class="meter-container">
@@ -162,15 +159,5 @@
     _dialog.close();
   });
 </script>
-<script type="module">
-  console.log("BOOTSTRAP v3 LOADED");
-  document.getElementById("start-button").addEventListener("click", async () => {
-    console.log("Start clicked");
-    await Tone.start();
-    console.log("Tone started, context state:", Tone.context.state);
-    document.getElementById("start-overlay").remove();
-    await import("./assets/app.js");
-    console.log("app.js loaded");
-  }, { once: true });
-</script>
+<script type="module" src="./assets/app.js"></script>
 </html>

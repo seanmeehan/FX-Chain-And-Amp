@@ -688,21 +688,19 @@ masterVolumeSlider.addEventListener("input", () => {
 
 navigator.mediaDevices.addEventListener("devicechange", populateInputDevices);
 
-async function main() {
+// Wire up audio chain immediately — no user gesture needed for connects.
+// Tone.start() (which resumes the AudioContext) is called on first interaction.
+audioSourceGain.connect(monoSignal);
+monoSignal.connect(inputMeter.input);
+inputMeter.output.connect(outputMeter.input);
+outputMeter.output.connect(masterVolume);
+
+document.addEventListener("click", async () => {
   await Tone.start();
-  audioSourceGain.connect(monoSignal);
-  monoSignal.connect(inputMeter.input);
-  inputMeter.output.connect(outputMeter.input);
-  outputMeter.output.connect(masterVolume);
-  // Default to keyboard/synth mode rather than opening the mic. This prevents
-  // feedback loops on phones where the mic and speaker are next to each other,
-  // which can happen instantly because echoCancellation is disabled.
   await setInputDevice("__keyboard__");
   await populateInputDevices();
   document.getElementById("input-device").value = "__keyboard__";
-}
-
-main();
+}, { once: true });
 
 // Recording
 const recorder = new Tone.Recorder();
