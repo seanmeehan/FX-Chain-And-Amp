@@ -488,11 +488,14 @@ function updateTuner() {
 requestAnimationFrame(updateTuner);
 
 // === On-screen keyboard / synth =============================================
-// PolySynth routed into the FX chain so notes get the same effects as the mic.
-const synth = new Tone.PolySynth(Tone.Synth, {
-  oscillator: { type: "sawtooth" },
-  envelope: { attack: 0.005, decay: 0.1, sustain: 0.6, release: 0.4 },
-  volume: -10,
+// PluckSynth (Karplus-Strong physical model) wrapped in a PolySynth for chords.
+// Produces a plucked-string tone that sounds like an electric guitar once it
+// hits the FX chain (especially distortion + amp IR).
+const synth = new Tone.PolySynth(Tone.PluckSynth, {
+  attackNoise: 1,
+  dampening: 4000,
+  resonance: 0.95,
+  volume: -6,
 });
 synth.connect(audioSourceGain);
 
