@@ -19,5 +19,17 @@
     ],
     "ampOn": true,
     "ampType": "Allure_67_Brit_Greenback"
+  },
+  {
+    "name": "★ Jerry Cantrell",
+    "pedals": [
+      { "id": "compressor-module", "on": true, "sliders": [7, -28] },
+      { "id": "distortion-module", "on": true, "sliders": [28, 4, 1.2] },
+      { "id": "chorus-module", "on": true, "sliders": [0.8, 0.4, 0.6] },
+      { "id": "delay-module", "on": true, "sliders": [0.35, 0.3, 0.2] },
+      { "id": "reverb-module", "on": true, "sliders": [3.5, 0.2, 0.25] }
+    ],
+    "ampOn": true,
+    "ampType": "Allure_67_Brit_Greenback"
   }
 ]
