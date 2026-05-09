@@ -314,6 +314,35 @@ document.getElementById("share-preset").addEventListener("click", async () => {
   }
 });
 
+// Export the current preset as a JS snippet ready to paste into BUILTIN_PRESETS
+// in this file — so AI-generated or manually-tuned tones can be promoted to
+// shipped built-ins for everyone (like ★ Rory Gallagher / ★ Blos).
+function formatBuiltinSnippet(name, preset) {
+  const pedalsStr = preset.pedals
+    .map((p) => `    { id: ${JSON.stringify(p.id)}, on: ${!!p.on}, sliders: [${p.sliders.join(", ")}] },`)
+    .join("\n");
+  return `  ${JSON.stringify(name)}: {
+    pedals: [
+${pedalsStr}
+    ],
+    ampOn: ${!!preset.ampOn},
+    ampType: ${JSON.stringify(preset.ampType || "")},
+  },`;
+}
+
+document.getElementById("export-builtin").addEventListener("click", async () => {
+  const rawName = prompt("Name this preset (a ★ prefix is added automatically if missing):");
+  if (!rawName) return;
+  const name = rawName.trim().startsWith("★") ? rawName.trim() : `★ ${rawName.trim()}`;
+  const snippet = formatBuiltinSnippet(name, getCurrentPreset());
+  try {
+    await navigator.clipboard.writeText(snippet);
+    alert(`Copied! Paste this snippet inside BUILTIN_PRESETS in assets/app.js:\n\n${snippet}`);
+  } catch {
+    prompt("Copy this snippet into BUILTIN_PRESETS in assets/app.js:", snippet);
+  }
+});
+
 // Auto-apply preset from URL hash if present
 function applyHashPreset() {
   const m = location.hash.match(/preset=([^&]+)/);
