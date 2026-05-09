@@ -488,34 +488,13 @@ function updateTuner() {
 requestAnimationFrame(updateTuner);
 
 // === On-screen keyboard / synth =============================================
-// PluckSynth is the Karplus-Strong physical model — it actually simulates a
-// plucked string (delay line + filter feedback) and sounds genuinely guitar-
-// like, especially through distortion + amp IR. PluckSynth can't go inside
-// PolySynth (doesn't extend Monophonic), so we manage a voice pool manually
-// and round-robin through it on each attack.
-const PLUCK_VOICES = 8;
-const pluckBus = new Tone.Gain();
-pluckBus.connect(audioSourceGain);
-const pluckPool = [];
-for (let i = 0; i < PLUCK_VOICES; i++) {
-  const v = new Tone.PluckSynth({
-    attackNoise: 0.7,   // a bit of pick noise on attack
-    dampening: 5000,    // brighter strings
-    resonance: 0.97,    // long sustain so chords ring out
-  });
-  v.volume.value = -8;
-  v.connect(pluckBus);
-  pluckPool.push(v);
-}
-let pluckNext = 0;
-const synth = {
-  triggerAttack(note) {
-    pluckPool[pluckNext].triggerAttack(note);
-    pluckNext = (pluckNext + 1) % PLUCK_VOICES;
-  },
-  // PluckSynth strings decay naturally — no explicit release needed.
-  triggerRelease() {},
-};
+// PolySynth routed into the FX chain so notes get the same effects as the mic.
+const synth = new Tone.PolySynth(Tone.Synth, {
+  oscillator: { type: "sawtooth" },
+  envelope: { attack: 0.005, decay: 0.1, sustain: 0.6, release: 0.4 },
+  volume: -10,
+});
+synth.connect(audioSourceGain);
 
 const keyboardEl = document.getElementById("keyboard");
 const keyboardToggle = document.getElementById("keyboard-toggle");
