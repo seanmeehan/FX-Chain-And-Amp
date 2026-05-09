@@ -68,6 +68,72 @@
   background: #00ff91;
   color: #000;
 }
+.pedal-picker-category {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #888;
+  text-transform: uppercase;
+  margin: 8px 0 2px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid #444;
+}
+.pedal-picker-category:first-child {
+  margin-top: 0;
+}
+.tb-btn {
+  font-size: 14px;
+  padding: 8px 14px;
+  background: #2c3e50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+.tb-btn:hover {
+  filter: brightness(1.15);
+}
+.tb-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.kbd-key {
+  position: absolute;
+  border: 1px solid #000;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+  font-family: monospace;
+  font-size: 10px;
+  transition: background 0.05s;
+}
+.kbd-white {
+  background: #fff;
+  color: #555;
+  height: 100%;
+  z-index: 1;
+  border-radius: 0 0 4px 4px;
+}
+.kbd-black {
+  background: #222;
+  color: #aaa;
+  height: 60%;
+  z-index: 2;
+  border-radius: 0 0 3px 3px;
+}
+.kbd-white.active {
+  background: #00ff91;
+  color: #000;
+}
+.kbd-black.active {
+  background: #00b865;
+  color: #000;
+}
 
 body {
   background-color: #f2f2f2;

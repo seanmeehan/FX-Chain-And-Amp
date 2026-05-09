@@ -10,10 +10,42 @@
 </head>
 <body>
   <h1>FX Chain with Amp</h1>
-  <div id="recorder-bar" style="display:flex;gap:12px;align-items:center;justify-content:center;padding:8px;">
-    <button id="record-button" style="font-size:16px;padding:8px 20px;background:#c0392b;color:white;border:none;border-radius:6px;cursor:pointer;">● Record</button>
+  <div id="recorder-bar" style="display:flex;gap:12px;align-items:center;justify-content:center;padding:8px;flex-wrap:wrap;">
+    <label style="font-size:13px;color:#444;">Input:
+      <select id="input-device" class="tb-btn" style="background:#34495e;margin-left:6px;"><option value="">(default)</option></select>
+    </label>
+    <button id="record-button" class="tb-btn" style="background:#c0392b;">● Record</button>
     <span id="record-status" style="font-family:monospace;color:#444;">Idle</span>
     <div id="recordings-list" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+  </div>
+  <div id="keyboard-panel" style="margin:8px auto;max-width:760px;padding:10px;background:#1a1a1a;border-radius:8px;color:#fff;">
+    <div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:8px;">
+      <button id="keyboard-toggle" class="tb-btn" style="background:#27ae60;">🎹 Keyboard</button>
+      <button id="keyboard-octave-down" class="tb-btn" style="background:#34495e;">◀ Oct</button>
+      <span id="keyboard-octave-label" style="font-family:monospace;min-width:60px;text-align:center;">C4–C6</span>
+      <button id="keyboard-octave-up" class="tb-btn" style="background:#34495e;">Oct ▶</button>
+      <span style="font-size:11px;color:#888;">QWERTY: A S D F G H J K L (white) · W E T Y U O P (black) · Z/X octave</span>
+    </div>
+    <div id="keyboard" style="display:none;position:relative;height:140px;user-select:none;"></div>
+  </div>
+  <div id="tuner-panel" style="display:flex;align-items:center;justify-content:center;gap:16px;padding:10px;margin:8px auto;max-width:420px;background:#1a1a1a;color:#fff;border-radius:8px;font-family:monospace;">
+    <span style="font-size:11px;letter-spacing:2px;color:#888;">TUNER</span>
+    <span id="tuner-note" style="font-size:42px;font-weight:700;min-width:90px;text-align:center;">--</span>
+    <div style="display:flex;flex-direction:column;align-items:center;min-width:140px;">
+      <span id="tuner-cents" style="font-size:14px;color:#aaa;">— hz</span>
+      <div id="tuner-meter" style="position:relative;width:140px;height:8px;background:#333;border-radius:4px;margin-top:4px;">
+        <div id="tuner-needle" style="position:absolute;left:50%;top:-2px;width:2px;height:12px;background:#888;transition:left 0.05s,background 0.1s;"></div>
+        <div style="position:absolute;left:50%;top:0;width:1px;height:8px;background:#555;"></div>
+      </div>
+    </div>
+  </div>
+  <div id="preset-bar" style="display:flex;gap:8px;align-items:center;justify-content:center;padding:8px;flex-wrap:wrap;">
+    <button id="save-preset" class="tb-btn">💾 Save preset</button>
+    <select id="load-preset" class="tb-btn" style="background:#34495e;"><option value="">Load preset…</option></select>
+    <button id="delete-preset" class="tb-btn" style="background:#7f8c8d;">🗑</button>
+    <button id="share-preset" class="tb-btn" style="background:#16a085;">🔗 Copy share link</button>
+    <button id="tap-tempo" class="tb-btn" style="background:#8e44ad;">⏱ Tap tempo</button>
+    <span id="tap-tempo-display" style="font-family:monospace;color:#444;"></span>
   </div>
   <div id="start-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:99999;">
     <button id="start-button" style="font-size:32px;padding:24px 48px;background:#e74c3c;color:white;border:none;border-radius:8px;cursor:pointer;">Start Audio</button>
