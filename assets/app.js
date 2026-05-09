@@ -12,9 +12,9 @@ const monoSignal = new Tone.Mono();
 const destination = Tone.getDestination();
 const audioSourceGain = new Tone.Gain();
 // Master volume in dB (user controllable) feeds into a brick-wall limiter
-// before the destination. Starts at -12 dB so a fresh page load (or
-// accidental feedback loop on a phone) is never deafening.
-const masterVolume = new Tone.Volume(-12);
+// before the destination. Starts at -40 dB - barely audible - so a fresh
+// page load can never be loud, even with feedback. User slides up to play.
+const masterVolume = new Tone.Volume(-40);
 const masterLimiter = new Tone.Limiter(-3);
 masterVolume.connect(masterLimiter);
 masterLimiter.connect(destination);
